@@ -1,0 +1,1101 @@
+---
+title: An R Markdown document converted from "01_Rbasics/01_Rbasics.ipynb"
+output: html_document
+---
+
+# Práctica 1: Básicos de R
+
+En este notebooks haremos una introducción a elementos básicos de R: - Introducción - tipos de variables - operaciones lógicas - asignación de variables - operaciones aritméticas - numericas, logicas, funciones, complejas y caracteres - vectores - listas - Matrices
+
+##### Otras cosas a tener en cuenta
+
+-   Comentarios
+    -   se usa la \# para escapar una linea
+
+## 1. Introducción
+
+A continuación se muestran los tipos de variables que se pueden encontrar dentro de R
+
+<img src="http://2.bp.blogspot.com/-x4n3xt5FCZI/VtFqqimUPLI/AAAAAAAAFn0/Kq07_1xdCyY/s1600/basic_data_types_R.PNG" alt="data types" style="width: 300px;"/>
+
+### 1.1 Asignación de variables
+
+Se usa el comando \<- o = para asignar una variable
+
+```{r}
+
+# asignación
+x <- 42
+y <- TRUE # True
+z = FALSE # False
+# print la variable
+x
+y
+z
+```
+
+### 1.2 Tipos de variables
+
+Para determinar el tipo de variable de un objeto usamos
+
+```{r}
+class(object)
+```
+
+Evaluamos a continuación funciones, enteros, caracteres, strings, logicas y complejos
+
+```{r}
+# clases funcion
+class(`=`)
+# clases funcion
+class(`<`)
+# clase de un float
+class(2.3)
+
+# clase de un caracter
+class('a')
+# clase de un string
+class("aaklf")
+# clase logical
+class(1>2)
+# clase de un 
+class(complex(1,2))
+```
+
+**EJERCICIO** - cual es la clase de 1? - cuales es la clase de 1L?
+
+### 1.3 Operaciones lógicas
+
+-   \< menor que
+-   \> mayor que
+-   \<= menor igual que
+-   \>= mayor igual que
+-   == igual a
+-   != no igual a
+
+```{r}
+1==1
+1>2
+3<=5
+2>1 & 2<1
+2>1 | 3>2
+```
+
+-   AND operdor &
+-   OR operador \|
+-   NOT operador ! \### & vs &&, \| vs \|\| Veamos las diferencias entre & y && y \| contra \|\|
+
+```{r}
+
+c(TRUE,TRUE,FALSE) & c(TRUE,FALSE,FALSE)
+c(TRUE,TRUE,FALSE) && c(TRUE,FALSE,FALSE)
+
+c(TRUE,TRUE,FALSE) | c(TRUE,FALSE,FALSE)
+c(TRUE,TRUE,FALSE) || c(TRUE,FALSE,FALSE)
+```
+
+### 1.4 Operaciones aritméticas básicas
+
+-   suma: +
+-   resta: -
+-   multiplicación: \*
+-   división: /
+-   exponenciación: \^
+-   módulo: %%
+
+```{r}
+# suma
+5 + 5 
+# resta
+5 - 5 
+# multiplicación
+3 * 5
+ # división
+(5 + 5) / 2 
+# Exponenciación
+(2^5) # **
+# Módulo
+(28%%6)
+```
+
+## 1.5 vectores
+
+Para definir un vector se usa el comando
+
+```{r}
+#c(e1,e2,e3,e4)
+c(1,2,3,4,5)
+```
+
+para definir un vector.
+
+El vector contiene siempre el mismo tipo de variable. En caso de no especificar, lo infiere.
+
+```{r}
+
+a<-c(TRUE,FALSE,TRUE)
+class(a)
+b<-c(TRUE,"a",1)
+b
+class(b)
+c<- c(1,"a")
+c
+class(c)
+d<-c(1,1L)
+class(d)
+```
+
+### 1.5.1 acceso a vectores y slices
+
+Podemos acceder a un vector mediante corchetes [] - acceso a un elemento - número, donde la primera posición comienza en 1 - acceso al primer elemento: 1 - acceso al último elemento - acceso a múltiples elementos - mediante vectores c(1,2,3) - usando slices c(1:3) - acceso por condiciones
+
+```{r}
+gastos<- c(14, -50, 20, -10, 240)
+# acceso al primer valor
+gastos[1]
+# o
+head(gastos,n=1)
+
+# acceso al último elemento
+gastos[length(gastos)]
+
+# acceso al último elemento
+tail(gastos, n=1)
+
+# acceso a multiples valores
+gastos[c(1,3)]
+# acceso a multiples valores mediante slices
+gastos[c(2:length(gastos))]
+c(2:length(gastos))
+# o
+c(2:length(gastos))
+gastos[2:length(gastos)]
+
+gastos[c(1,2,3)]
+```
+
+```{r}
+## encontrar el minimo
+which.min(gastos)
+## encontrar el maximo
+which.max(gastos)
+## min,max
+c(min(gastos),max(gastos))
+## suma gastos
+sum(gastos)
+## producto
+prod(gastos)
+```
+
+existen más funciones ... exp(), sin(), cos(), tan(), log(),\
+log10(), beta(a,b), gamma(x),
+
+### 1.5.2 nombrar un vector
+
+Es posible dar un nombre a un vector y acceder a un elemento mediante esos nombres
+
+```{r}
+# Ganancias por semana
+win_week <- c(14, -50, 20, -10, 240)
+
+
+# asignamos días
+names(win_week) <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+win_week
+```
+
+```{r}
+win_week["Tuesday"]
+```
+
+### 1.5.3 Operaciones con vectores
+
+-   vectores con vectores
+-   sobre vectores
+
+```{r}
+## crear un vector de 10 a 30 equiespaciado en 10
+a<-seq(10,30,10)
+a
+b<-seq(1:3)
+b
+c<-1:10
+```
+
+```{r}
+# definimos dos vectores de ganancias y perdidas en dos semanas
+g1_vector <- c(140, -50, 20, -120, 240)
+g2_vector <- c(-24, -50, 100, -350, 10)
+days_vector <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+names(g1_vector) <- days_vector
+names(g2_vector) <- days_vector
+
+# asignamos un total diario
+total_daily <- g1_vector+g2_vector
+total_daily
+g1_vector*g2_vector
+g1_vector/g2_vector
+
+g1_vector-g2_vector
+g1_vector>g2_vector
+```
+
+```{r}
+length(total_daily)
+sum(total_daily)
+mean(total_daily)
+```
+
+### EJERCICIO 1
+
+-   Define un vector que contenga los elementos 4.5,3.6,7.7,1.2,4.5,2.3,9.1,10.2,.9,0.1,30.1,14.3. Nombralo con "JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"
+
+-   Accede a las primeras 3 posiciones del vector
+
+-   Cual es el minimo y el máximo y en qué posicion están?
+
+-   Que pasa si nombras el vector con "JAN","FEB","MAR","APR","MAY","JUN","JUL"?
+
+-   Crea otro vector 3.3,2.1,9.2,11.3,23.4,10.3,15.6,17.2,1.2,0.1
+
+-   Extrae el valor de este vector y el del anterior
+
+-   Que sucede si sumas los dos vectores al tener diferentes tamaños?
+
+    ```{r}
+
+    a<- c( 4.5,3.6,7.7,1.2,4.5,2.3,9.1,10.2,.9,0.1,30.1,14.3)
+    names(a)<-c("JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC")
+    a
+    a[1:3]
+    which.max(a)
+    which.min(a)
+    a<-c( 4.5,3.6,7.7,1.2,4.5,2.3,9.1,10.2,.9,0.1,30.1,14.3)
+    names(a)<-c("JAN","FEB","MAR","APR","MAY","JUN","JUL")
+    a
+    b<- c(3.3,2.1,9.2,11.3,23.4,10.3,15.6,17.2,1.2,0.1)
+    a-b
+    ```
+
+### EJERCICIO 2
+
+-   Crea un vector que sea una secuencia de 1 a 100 y denominalo v.
+
+-   Haz el cuadrado de cada uno de los elementos de v.
+
+-   Dividelo por un vector c(1,2) y denomina a este nuevo vector vd. ¿Qué sucede?
+
+-   Busca en v aquellos valores que sean múltiplos de 2 y crea un nuevo vector denominado dpar que contenga sólo esos elementos.
+
+-   Crea un nuevo vector que contenga los 5 últimos elementos de dpar y llamalo dpartail. Crea otro que sea los 5 primeros elementos de dpar y denominalo dparhead.
+
+-   Crea un nuevo vector que sea la unión de dparhead y dpartail. Corrobora que su tamaño sea de 10.
+
+    ```{r}
+    v<-seq(1:100)
+    v^2
+    v/c(1,2)
+    dpar<-v[v%%2==0]
+    dpar
+    dpartail<-tail(dpar,n=5)
+    dparhead<-head(dpar,n=5)
+
+    c(dparhead,dpartail)
+    ```
+
+    \
+
+## 1.6 Matrices
+
+### 1.6.1 Creación de matrices
+
+Con el comando matrix
+
+```{r}
+matrix(1:9, byrow = TRUE, nrow = 3)
+print("byrow=FALSE")
+matrix(1:9, byrow = FALSE, nrow = 3)
+```
+
+A partir de vectores
+
+```{r}
+# creamos 3 vectores
+v0 <- c(460.998, 314.4)
+
+v1 <- c(290.475, 247.900)
+v2 <- c(309.306, 165.8)
+
+# Create box_office
+box_office <- c(v0,v1,v2)
+
+# Construct star_wars_matrix
+star_wars_matrix <- matrix(box_office,byrow=TRUE,nrow=2)
+star_wars_matrix
+```
+
+### 1.6.2 Nombrar una matriz
+
+```{r}
+
+v0 <- c(460.998, 314.4)
+v1 <- c(290.475, 247.900)
+v2 <- c(309.306, 165.8)
+
+# Construimos la matriz
+result <- matrix(c(v0, v1, v2), nrow = 3, byrow = TRUE)
+
+# definimos nombres de regiones y definiciones de los elementos de los vectores
+region <- c("ESPAÑA", "FUERA-ESPAÑA")
+titles <- c("VIDEOS", "AUDIOS", "CAMARAS")
+
+# definimos el nombre de las columnas regiones
+colnames(result)<- region
+
+# definimos el nombre de las filas con titulos
+rownames(result)<-titles
+
+# matriz
+result
+```
+
+```{r}
+class(result)
+```
+
+## 1.6.3 calculos con las matrices
+
+```{r}
+# Construimos de nuevo la matriz con un método diferente
+vt <- c(460.998, 314.4, 290.475, 247.900, 309.306, 165.8)
+result <- matrix(vt, nrow = 3, byrow = TRUE,
+                           dimnames = list(c("VIDEOS", "AUDIOS", "CAMARAS"), 
+                                           c("ESPAÑA", "FUERA-ESPAÑA")))
+
+result
+# hacemos sumas de España-America
+worldwide_vector <- rowSums(result)
+worldwide_vector
+```
+
+## 1.6.4 añadir una columna
+
+```{r}
+# Construct star_wars_matrix
+vt <- c(460.998, 314.4, 290.475, 247.900, 309.306, 165.8)
+result <- matrix(result, nrow = 3, byrow = TRUE,
+                           dimnames = list(c("VIDEOS", "AUDIOS", "CAMARAS"), 
+                                           c("ESPAÑA", "FUERA-ESPAÑA")))
+
+# The worldwide box office figures
+worldwide <- rowSums(result)
+# concatenamos el total
+all_wwv_res <- cbind(result,worldwide)
+all_wwv_res
+```
+
+### 1.6.5 añadir filas
+
+```{r}
+all_wwv_res
+```
+
+```{r}
+  
+MOBILE <- c(70, 100.34, 90.8)
+names(MOBILE)<-c("ESPAÑA","FUERA-ESPAÑA","worldwide")
+# Combinamos
+total <- rbind(all_wwv_res,MOBILE)
+total
+```
+
+### 1.6.6 selección de elementos de una matrix
+
+```{r}
+
+
+# Seleccionamos FUERA-DESPAÑA para todo
+non_es_all <- total[,2]
+  
+# promedio non-ES 
+mean(non_es_all)
+  
+# Seleccionamos el FUERA-ES para VIDEOS y AUDIOS
+non_es_some <- total[1:2,2]
+  
+# promedio FUERA-ES para VIDEOS  y AUDIOS
+mean(non_es_some)
+```
+
+### 1.6.7 Operaciones con matrices
+
+```{r}
+# division
+visitors <- total/5
+  
+visitors
+```
+
+```{r}
+
+vt <- c(460.998, 314.4, 290.475, 247.900, 309.306, 165.8,60.23, 34.34, 2405.435, 233.4, 34.36, 16.65)
+
+vt<-matrix(vt,nrow = 4,byrow = TRUE,  dimnames = list(c("VIDEOS", "AUDIOS", "CAMARAS","MOBILE"), 
+                                           c("ESPAÑA", "FUERA-ESPAÑA","worldwide")))
+
+# division matricial
+visitors <- total/vt
+visitors
+es_visitors <- visitors[,1]
+
+# promedio de es_visitors
+mean(es_visitors)
+```
+
+**Ejercicio 3**
+
+-   crea una matriz de 1:12 elementos con 3 filas y con con el parametro byrow=TRUE llamada a1
+
+-   crea otra matriz de 1:12 elementos con 4 filas y con el parametro byrow=FALSE llamada a2
+
+-   ¿Qué diferencias encuentras?
+
+-   Ejecuta el comando t(a2)
+
+-   En qué se diferencian las matrices?
+
+-   Haz la media de la primera matriz
+
+-   Haz la media de cada fila
+
+-   Haz la media de cada columna
+
+```{r}
+a1<-matrix(1:12,nrow=3,byrow=TRUE)
+a2<-matrix(1:12,nrow=4,byrow=FALSE)
+print(a1)
+print(a2)
+```
+
+```{r}
+rowMeans(a1)
+colMeans(a1)
+```
+
+**Ejercicio 4**
+
+-   Tenemos el vector (1.2,1.4,1.7,1.3,1.1,1.5,1.0) y otro que es (24,27,29,21,25,27,29). Crea una matriz que contenga los 2 vectores (cada uno en una fila) y llamala dt.
+
+-   Nombra las columnas de la matriz con c("Lun","Mar","Mie","Jue","Vie","Sab","Dom").
+
+-   Nombra las filas de la matriz con ("Temp","weight").
+
+-   Haz la media por columnas y por filas.
+
+## 1.7 factores
+
+Se usan para las variables categóricas. La diferencia entre una variable categorica y una continua es que la categorica tiene un numero limitado de elementos, mientras que la continua corresponde a un número infinito. Es muy importante debido a que según como asignemos la variable R trabaja de una manera u otra con ella.
+
+Un ejemplo sencillo de esto es el género de las personas.
+
+```{r}
+# genero
+sex_vector <- c("Hombre", "Mujer", "Mujer", "Hombre", "Hombre")
+sex_vector
+# lo convertimos a factores
+factor_sex_vector <-factor(sex_vector)
+
+factor_sex_vector
+```
+
+### 1.7.1 Tipos de factores
+
+Hay dos tipos de variables categóricas: - nominales: no tienen un orden implicito como puede ser el género. - ordinales: tienen un orden como puede ser primero, segundo o tercero.
+
+```{r}
+# animales
+animals_vector <- c("Gato", "Jirafa", "Mono", "Caballo")
+factor_animals_vector <- factor(animals_vector)
+factor_animals_vector
+
+# temperatura
+temperature_vector <- c("Alto", "Bajo", "Alto","Bajo", "Medio")
+factor_temperature_vector <- factor(temperature_vector, order = TRUE, levels = c("Bajo", "Medio", "Alto"))
+factor_temperature_vector
+```
+
+### 1.7.2 cambio de nombre de los factores
+
+Ojo, tiene que ser alfabeticamente
+
+```{r}
+# mujeres, hombres
+survey_vector <- c("M", "H", "H", "M", "M")
+factor_survey_vector <- factor(survey_vector)
+
+# especificamos niveles
+levels(factor_survey_vector) <-c("Hombre","Mujer")
+
+factor_survey_vector
+```
+
+## 1.7.3 Summary de la variable
+
+```{r}
+
+# vemos el sumario
+summary(survey_vector)
+
+summary(factor_survey_vector)
+```
+
+### 1.7.4 comparación de factores
+
+```{r}
+# hombre
+male <- factor_survey_vector[1]
+
+# mujer
+female <- factor_survey_vector[2]
+
+# Es hombre> mujer?
+male > female
+```
+
+### 1.7.5 factores ordenados
+
+```{r}
+# Create speed_vector
+speed_vector <- c("medium", "slow", "slow", "medium", "fast")
+
+# Convert speed_vector to ordered factor vector
+factor_speed_vector <- factor(speed_vector,ordered=TRUE,levels=c("slow","medium","fast"))
+
+# Print factor_speed_vector
+factor_speed_vector
+summary(factor_speed_vector)
+```
+
+### 1.7.6 comparaciones
+
+```{r}
+# creamos vector velocidad
+speed_vector <- c("medio", "lento", "lento", "medio", "rapido")
+factor_speed_vector <- factor(speed_vector, ordered = TRUE, levels = c("lento", "medio", "rapido"))
+
+# vemos el valor paral el segundo
+da2 <-factor_speed_vector[2]
+
+# vemos el valor para el 5to
+da5 <-factor_speed_vector[5]
+
+# es el 2 más rapido que el 5?
+da2>da5
+```
+
+#### Ejercicios
+
+-   Estamos estudiando alumnos de diferentes cursos de 1 a 6 de primaria. La variable curso es un factor o una variable continua?
+
+-   Es una variable ordinal o cardinal?
+
+-   Crea la variable curso y conviertela a factor correctamente
+
+-   evalúa si curso 6 \> curso 3.
+
+    ```{r}
+    curso<- factor(seq(1:6),order=TRUE)
+    curso[6]>curso[3]
+    ```
+
+## 1.8 DataFrames
+
+Los data frames son objetos de datos con columnas y como observaciones filas.
+
+## 1.8.1 crear un dataframe
+
+```{r}
+# definimos los vectores
+name <- c("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune")
+type <- c("Terrestrial planet", "Terrestrial planet", "Terrestrial planet", 
+          "Terrestrial planet", "Gas giant", "Gas giant", "Gas giant", "Gas giant")
+diameter <- c(0.382, 0.949, 1, 0.532, 11.209, 9.449, 4.007, 3.883)
+rotation <- c(58.64, -243.02, 1, 1.03, 0.41, 0.43, -0.72, 0.67)
+rings <- c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE)
+
+# creamos un data frame de los vectores
+planets_df <- data.frame(name,type,diameter,rotation,rings)
+planets_df
+```
+
+### 1.8.2 estructura del dataframe
+
+```{r}
+str(planets_df)
+```
+
+```{r}
+planets_df$name
+```
+
+```{}
+```
+
+### 1.8.3 ordenar un dataframe
+
+```{r}
+#order(planets_df$diameter)
+planets_df[order(planets_df$diameter),]
+```
+
+### 1.8.4 acceso de un dataframe
+
+```{r}
+# The planets_df data frame from the previous exercise is pre-loaded
+
+# Print out diameter of Mercury (row 1, column 3)
+#planets_df[1,3]
+#planets_df[,4]
+# Print out data for Mars (entire fourth row)
+planets_df[4,]
+```
+
+```{r}
+planets_df$type
+```
+
+```{r}
+# seleccionar los 5 primeros valores de diametros
+planets_df[1:5,"diameter"]
+```
+
+```{r}
+
+# seleccionar todos los anillos
+rings_vector <-planets_df[,"rings"] 
+
+rings_vector
+```
+
+```{r}
+#seleccionamos todos los planetas con anillos
+planets_df[rings_vector, ]
+```
+
+Creación de una nueva columna
+
+```{r}
+planets_df$constant = 1
+planets_df
+```
+
+### 1.8.5 filtrado usando subset
+
+```{r}
+#seleccionamos planetas con diametro <1
+subset(planets_df, subset = diameter<1)
+```
+
+#### Ejercicio
+
+-   Utiliza el Data Frame de planets_df. Calcula por cada columna los valores promedio.
+
+-   Ordena el dataframe por el nombre del planeta
+
+-   Selecciona sólo las variables name, type y diameter y crea un nuevo dataframe llamado planets_df_subset con este output.
+
+-   Filtra el data frame por tipo Gas Giant.
+
+```{r}
+subset(planets_df,planets_df$type=="Gas giant")
+#sapply(planets_df,1:2,FUN=mean)
+
+```
+
+## 1.9 Listas
+
+```{r}
+#vector con numeros del 1 al 10
+my_vector <- 1:10 
+
+# matriz
+my_matrix <- matrix(1:9, ncol = 3)
+
+
+# la lista contiene diferentes elementos
+my_list <-list(my_vector,my_matrix)
+my_list
+```
+
+Podemos poner nombres a los componentes de la lista
+
+```{r}
+my_list <- list(vec=my_vector, mat=my_matrix )
+
+my_list
+```
+
+#### Ejercicio
+
+-   Crea una lista que contenga el dataframe del ejercicio anterior planets_df, el número 7 y una secuencia del 1 al 3.
+
+-   Accede al tercer elemento
+
+-   Filtra todos los objetos de la lista que no sean un data.frame
+
+```{r}
+a<- list(planets_df,7,seq(1:3))
+a[3]
+class(planets_df)=="data.frame"
+
+a[!sapply(a,is.data.frame)]
+```
+
+```{r}
+expected_df<-function(x){
+  return(class(x)=="data.frame")
+}
+
+```
+
+## 2 Condicionales y Loops
+
+```         
+if(condition1) {
+  expr1
+} else if(condition2) {
+  expr2
+} else {
+  expr3 }
+```
+
+## 2.1 Loop
+
+## 2.1.1 While
+
+```         
+while(condition) {
+ expr }
+ 
+```
+
+### 2.1.2 Break
+
+```         
+while(condition) {
+  expr
+  break
+ }
+```
+
+## 2.2 For
+
+```         
+for(var in seq) {
+  expr
+}
+```
+
+```{r}
+ cities <- c("New York", "Paris",
+ "London", "Tokyo",
+ "Rio de Janeiro", "Cape Town")
+
+ for(city in cities) {
+     if(nchar(city) == 6) {
+      break
+     }
+      print(city)
+ }
+```
+
+```{r}
+ for(i in 1:length(cities)) {
+ print(cities[i])
+ }
+```
+
+Usando next
+
+```{r}
+ for(city in cities) {
+ if(nchar(city) == 6) {
+ next
+ }
+ print(city)
+ }
+```
+
+## 3 Funciones
+
+Ejemplo sd
+
+```{r}
+sd(x, na.rm = FALSE)
+```
+
+```{r}
+help(sd)
+```
+
+```{r}
+args(sd) 
+```
+
+## Escribir funciones
+
+```         
+ my_fun <- function(arg1, arg2,arg_opt1=arg3) {
+  body
+ }
+```
+
+```{r}
+triple <- function(x=1) {
+ y <-
+3 * x
+ return(y)
+ }
+triple(2)
+triple()
+```
+
+#### Ejercicio
+
+-   Crea una funcion llamada myfunc que pase como parametro un vector y que en caso de que contenga un numero de elementos par, devuelva el vector con los elementos pares y en caso de ser impar, devuelva los impares
+
+-   Crea una función que lance un número N de veces una moneda (N es el argumento de la función) de manera aleatoria y que devuelva el porcentaje de veces que ha salido cara.
+
+    ```{r}
+    runcoin <- function(N){
+      X <- rbinom(N, 1, 0.5)
+      return(mean(X))
+    }
+    runcoin2 <- function(N){
+      mean(sample(c(0,1),N,replace=TRUE))
+    }
+
+    runcoin(10)
+    runcoin2(10)
+    ```
+
+## 6 Paquetes de R
+
+Instalar paquetes - Load packages: library(), require()
+
+```{r}
+install.packages("ggplot2")
+```
+
+```{r}
+ search()
+ 
+```
+
+```{r}
+library("ggplot2")
+```
+
+```{r}
+ require("data.table")  
+result <- require("data.table")
+```
+
+## 7 Otras funciones
+
+### 7.1 lapply
+
+Funciona sobre vectores o listas
+
+```{r}
+ nyc <- list(pop = 8405837,
+ boroughs = c("Manhattan", "Bronx", "Brooklyn",
+ "Queens", "Staten Island"),
+ capital = FALSE)
+```
+
+Ejemplo con for
+
+```{r}
+for(info in nyc) {
+ print(nchar(info))
+ }
+```
+
+Ejemplo con lapply
+
+```{r}
+ lapply(nyc, nchar)
+```
+
+## 7.2 sapply
+
+devuelve un array
+
+```{r}
+ cities <- c("New York", "Paris", "London", "Tokyo",
+ "Rio de Janeiro", "Cape Town") 
+```
+
+```{r}
+lapply(cities, nchar)
+```
+
+```{r}
+ unlist(lapply(cities, nchar))
+```
+
+```{r}
+ sapply(cities, nchar) 
+```
+
+```{r}
+ sapply(cities, nchar, USE.NAMES = FALSE) 
+```
+
+## 7.3 Otras funciones utiles
+
+### 7.3.1 para estructuras de datos
+
+```{r}
+li <- list(log = TRUE,
+ ch = "hello",
+ int_vec = sort(rep(seq(8, 2, by = -2), times = 2)))
+str(li)
+```
+
+```{r}
+sort(rep(seq(8, 2, by = -2), times = 2))
+```
+
+### seq
+
+```{r}
+ seq(1, 10, by = 3)
+```
+
+### rep()
+
+```{r}
+rep(c(8, 6, 4, 2), times = 2)
+```
+
+#### sort()
+
+```{r}
+ sort(rep(seq(8, 2, by = -2), times = 2))
+```
+
+### is.*(), as.*()
+
+```{r}
+li2 <- as.list(c(1, 2, 3))
+```
+
+```{r}
+my_date <- as.Date("1971-05-14") 
+my_date
+```
+
+### append(), rev()
+
+```{r}
+str(append(li, rev(li)))
+```
+
+### Ejercicios
+
+-   Existen datasets precargados en R. Mira la variable, mtcars.
+
+-   Utilizando lapply, calcula la media por columna. Usa luego sapply, que diferencias ves?
+
+-   Utilizando la función apply (mira en help la diferencia), calcula para el dataset del Titanic la suma de gente en función de la clase en la que iba. También evalúa la suma de gente que era Hombre o mujer en el dataset.
+
+# 8 importar datos en R
+
+```{r}
+df <- read.table("https://s3.amazonaws.com/assets.datacamp.com/blog_assets/test.txt", 
+                 header = FALSE)
+df
+```
+
+```{r}
+# Read in csv files
+df <- read.table("https://s3.amazonaws.com/assets.datacamp.com/blog_assets/test.csv", 
+                 header = FALSE,
+                 sep = ",")
+```
+
+```{r}
+# Activate `rjson`
+install.packages("rjson")
+library(rjson)
+
+# Import data from json file
+JsonData <- fromJSON(file= "example.json" )
+JsonData
+```
+
+# Cuidados a tener con R
+
+-   se pueden sumar elementos con diferente longitud
+-   Cuidado cuando cargamos multiples librerias
+
+```{r}
+months<-c(34, 54, 23, 12, 9, 1, 18)
+
+years<-months/12
+print(years)
+years_int<-as.integer(years)
+
+print(years_int)
+div_months <-c(12, 18, 2, 12, 2, 0, 9)
+years_int-div_months
+
+c(mean(months),median(months),sd(months),var(months),min(months),max(months))
+```
+
+```{r}
+C2F <- function(celsius) {
+ f = (9/5) * celsius + 32; 
+ return(f)}
+C2F(23)
+C2F(27)
+```
+
+```{r}
+vol_cono<-function(R,H){
+  1/3*pi*R^2*H
+}
+
+R <- c(2.27, 1.98, 1.69, 1.88, 1.64, 2.14)
+H <- c(8.28, 8.04, 9.06, 8.70, 7.58, 8.34)
+
+
+vols<-vol_cono(R,H)
+print(vols)
+
+c(mean(vols),sd(vols),median(vols))
+vols[vols<8]
+```
+
+```{r}
+win_week2 <- c(14, -50, 20, -10, 240,200)
+win_week+win_week2
+```
+
+```{r}
+df<- read.csv2("http://ismayc.github.io/periodic-table-data.csv",sep=",",dec = ".")
+
+str(df)
+```
+
+```{r}
+df_gas<-subset(df,df$state_at_stp=="Gas")
+df_gas
+```
+
+```{r}
+colMeans(df[])
+```

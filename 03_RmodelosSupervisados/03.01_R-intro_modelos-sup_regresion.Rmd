@@ -1,0 +1,304 @@
+# Modelos de regresión en R
+
+## Regresión lineal
+
+El paquete principal para la realización de modelos de ML en R es caret. Sin embargo, la regresión lineal (lm) viene ya directamente en las funciones precargadas de R.
+
+```{r}
+# library(ISLR)    #Into to Stat Learning package
+library(MASS)     # contiene Boston
+library(tidyverse) 
+library(ggplot2)
+# library(knitr)    #kable 
+# library(car)      #has good residuals and VIF functions
+# library(plyr)
+# library(stargazer) #displays linear regression results table very nicely
+library(broom)
+```
+
+```{r}
+head(Boston)
+```
+
+Usaremos el dataset de Boston, y principalmente nos centraremos en estas dos variables:
+
+-   medv: median house values (en miles de dolares)
+
+-   lstat: lower status of the population (porcentaje)
+
+## Regresión lineal simple
+
+```{r}
+plot(medv~lstat, Boston)
+```
+
+```{r}
+fit1 <- lm(medv~lstat, data = Boston)
+summary(fit1)
+```
+
+Vemos que la ecuación sería del orden `medv = -0.95*lstat + 34.55` y que tanto la pendiente como la constante son significativas. El R\^2 es de 0.54 (varianza explicada).
+
+Ploteamos la regresión
+
+```{r}
+plot(medv~lstat, Boston)
+abline(fit1,col = "red")
+
+```
+
+```{r}
+coefficients(fit1)
+```
+
+Podemos sacar las predicciones del train del propio modelo
+
+```{r}
+head(fitted(fit1))
+```
+
+También los residuos
+
+```{r}
+hist(residuals(fit1))
+```
+
+La librería broom nos da un poco más de información sobre los modelos
+
+```{r}
+tidy(fit1)
+```
+
+```{r}
+glance(fit1)
+```
+
+Es posible hacer un update de la regresión y cambiar parámetros
+
+```{r}
+fit2 <- update(fit1,~.+indus)
+summary(fit2)
+```
+
+y hacer una comparación de modelos mediante ANOVA
+
+```{r}
+anova(fit1, fit2)
+```
+
+**Ejercicio**
+
+Haz una regresión lineal y grafícala usando ggplot2.
+
+**Intervalos de confianza de la pendiente e intersección**
+
+Podemos ver los intervalos de confianza de nuestra regresión:
+
+```{r}
+confint(fit1, level = 0.95) 
+
+```
+
+Los intervalos de confianza nos permiten obtener un intervalo de predicción del modelo
+
+```{r}
+ predict(fit1, data.frame(lstat = c(5,10,15,30)), interval = "prediction")  %>% 
+kable(digits = 3, col.names = c("Prediction Fit","Lower 95%", "Upper 95%"))
+```
+
+Si quisiesemos hacer la regresión sin intersección
+
+```{r}
+lm(medv~lstat+0, data = Boston)
+```
+
+**Predicciones**
+
+```{r}
+x <-  c(5,10,15, 30)
+new_x <-data.frame(lstat = c(5,10,15, 30))  
+
+
+CI <- predict(fit1,  new_x, interval = "confidence") 
+PI <- predict(fit1, new_x, interval = "prediction") 
+
+
+plot(medv~lstat, Boston,pch = "+" , col = "gray")
+
+points(x, CI[1:4], pch = 19, col = "black" )  
+ # 29.8, 25.05, 20.30 and 6.05 are predicted values y_hat
+
+# --The Confidence Interval Points 
+points(x, CI[5:8],pch = 20, col = "blue") # lower bound 
+points(x,CI[9:12],pch = 20, col = "blue") # upper bound
+
+# --The Prediction Interval Points 
+ points(x,PI[5:8],pch = 20, col = "red") #lower bound of PI
+points(x,PI[9:12], pch = 20,col = "red") #Upper bound of PI
+abline(fit1, pch = "--", col = "darkgray")
+```
+
+**Predicciones dentro de un dataframe**
+
+```{r}
+prediction_data <- Boston %>%  
+  mutate(    preds = predict(  fit1, Boston))
+head(prediction_data)
+```
+
+**Análisis de la Regresión**
+
+La librería ggfortify permite analizar los resultados de la regresión lineal con un comando: autoplot.
+
+En él se especifica el modelo y luego el parámetro which que puede ser:
+
+which=1 -\> residuals vs edvalues
+
+which = 2 -\> Q-Qplot
+
+which = 3 -\> scale-location
+
+```{r}
+#install.packages("ggfortify")
+library(ggfortify)
+autoplot(  fit1,  which =1:3,  nrow =3,  ncol =1)
+
+```
+
+## División Train/Test
+
+Si quisiesemos dividir nuestro dataset en train/test
+
+```{r}
+
+set.seed(1)
+df<- Boston
+#use 70% of dataset as training set and 30% as test set
+sample <- sample(c(TRUE, FALSE), nrow(df), replace=TRUE, prob=c(0.7,0.3))
+
+train  <- df[sample, ]
+test   <- df[!sample, ]
+```
+
+Es posible también hacerlo con otras librerías (como caret) que veremos en un futuro.
+
+```{r}
+fit3<-lm(medv~lstat,train)
+preds<-predict(fit3,test)
+```
+
+La librería metrics contiene funciones que nos permite testear el modelo
+
+```{r}
+#install.packages("Metrics")
+library(Metrics)
+rmse(test$medv,preds)
+mae(test$medv,preds)
+```
+
+## Ejemplo con caret
+
+Ojo, aquí se hace ya directamente un boostrap para calcular los errores del modelo en test.
+
+```{r}
+#install.packages("caret")
+library(caret)
+set.seed(123)
+
+fit4 <-
+  train(medv~lstat, data = Boston, method = "lm")
+fit4
+
+train(x=Boston$medv, y=Boston$lstat, method = "lm")
+```
+
+**Ejercicio**
+
+Haz una regresión lineal simple, otra múltiple y analizala y compara los resultados a partir de los siguientes datos:
+
+```{r}
+#install.packages("fst")
+library(fst)
+```
+
+```{r}
+df<-read_fst("taiwan_real_estate.fst")
+head(df)
+```
+
+-   La variable dependiente es: price_twd_msq. Usa primero la variable dist_to_mrt_m, luego añade n_convenience y house_age_years.
+
+-   Evalúa qué es lo que sucede con la variable house_age_years al ser un factor.
+
+-   Prueba a añadir relaciones no lineales a la regresión. También prueba a añadir expresiones polinómicas. ¿Qué sucede?
+
+```{r}
+fit1<-lm(price_twd_msq~dist_to_mrt_m,data=df)
+summary(fit1)
+```
+
+```{r}
+fit2<-update(fit1,~.+n_convenience + house_age_years )
+summary(fit2)
+```
+
+```{r}
+fit3<-lm(price_twd_msq~dist_to_mrt_m+n_convenience+n_convenience*dist_to_mrt_m+n_convenience^2,data=df)
+summary(fit3)
+
+```
+
+## Ridge/Lasso regresion
+
+```{r}
+#install.packages("glmnet")
+library(glmnet)
+
+```
+
+gmlnet hace automáticamente la estandarización de los datos
+
+```{r}
+
+x <- as.matrix(train[,!(names(train) %in% c("medv"))])
+y <- as.matrix(train$medv)
+
+#ridge regression model alpha->0
+model <- glmnet(x,y, alpha = 0)
+summary(model)
+
+```
+
+```{r}
+plot(model)
+```
+
+```{r}
+coef(model)
+```
+
+Es necesario hacer un cv para evaluar cual es el lambda más adecuado.
+
+```{r}
+#lasso regression model lambda->0
+model <- glmnet(x,y, lambda = 0)
+summary(model)
+```
+
+```{r}
+coef(model)
+```
+
+```{r}
+#elasticnet regression model
+model <- glmnet(x,y)
+summary(model)
+```
+
+```{r}
+coef(model)
+```
+
+**Ejercicio**
+
+Evalúa a partir de los resultados del ejercicio anterior, la aplicación de una regresión Ridge y Lasso.

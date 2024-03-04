@@ -1,0 +1,137 @@
+# Visualización con ggplot2
+
+A continuación veremos posibles gráficas con la librería ggplot2.
+
+```{r}
+library(ggplot2)
+
+```
+
+Utilizaremos los datos de mtcars para nuestro caso de uso:
+
+```{r}
+mtcars
+```
+
+Vemos a continuación que primero definimos los datos, luego el tipo de gráfico e información adicional sobre el mismo.
+
+```{r}
+ggplot(data = mtcars, aes(x = gear)) + geom_bar()  + 
+  ggtitle("Barplot") + 
+   xlab("gear") + 
+  ylab("Count")  
+
+```
+
+Podemos introducir adicionalmente el color de la variable también en el gráfico
+
+```{r}
+ggplot(data = mtcars, aes(x = gear, fill = as.factor(gear))) + 
+ geom_bar()  + 
+  ggtitle("Barplot") + 
+   xlab("gear") + 
+  ylab("Count") 
+```
+
+O también poner un color que no dependa de ninguna variable, pero en este caso iría en la estética del geom_bar:
+
+```{r}
+ggplot(data = mtcars, aes(x = gear)) + 
+  geom_bar(color = 'slateblue', fill = 'skyblue2') + 
+  ggtitle("Barplot") + 
+   xlab("gear") + 
+  ylab("Count") 
+
+
+```
+
+```{r}
+ggplot(mtcars, aes(mpg, fill = as.factor(cyl))) +
+  geom_histogram(binwidth = 1, position = "identity")
+```
+
+```{r}
+ggplot(mtcars, aes(mpg, fill = as.character(mtcars$cyl))) +
+  geom_histogram(binwidth = 1, position = "identity")
+```
+
+```{r}
+ggplot(mtcars, aes(x = cyl, fill = as.factor(am))) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Set1")
+```
+
+Histograma
+
+```{r}
+ggplot(mtcars, aes(x = mpg)) + 
+  geom_histogram( fill = 'steelblue', binwidth=2) + 
+  xlab("mpg") + 
+  ylab("Frecuencia") + 
+  theme_minimal()
+```
+
+```{r}
+ggplot(mtcars) + 
+  geom_histogram( aes(x = mpg,fill = brand), binwidth=2) + 
+  xlab("mpg") + 
+  ylab("Frecuencia") + 
+  theme_minimal()
+```
+
+A continuación dividimos la gráfica en varias en función los posibles valores de una variable. `facet_grid()` hace referencia a qué se va a representar en las filas y columnas. Así, la expresión `cyl~.` puede leerse como: la variable 'cyl' en cada fila, el resto en las columnas. El argumento `scales = 'free'` lo que produce es que cada histograma por separado se reescala de manera automática para lograr una mejor representación de los datos.
+
+```{r}
+ggplot(mtcars) + 
+  geom_histogram( aes(x = mpg,fill = as.character(mtcars$cyl)), binwidth=2) + 
+  facet_grid(as.character(mtcars$cyl)~., scales = 'free') +
+  xlab("Carat") + 
+  ylab("Frecuencia") + 
+  theme_minimal()
+
+```
+
+Scatter plot
+
+```{r}
+# Basic scatter plot: wt on x-axis and mpg on y-axis; map cyl to col
+ggplot(mtcars, aes(x=wt, y=mpg, color=cyl))+
+geom_point(size=4)
+```
+
+```{r}
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point() + # Copy from Plot 1
+  geom_smooth(method="lm", se=FALSE)   # Fill in using instructions Plot 2
+```
+
+```{r}
+ggplot(mtcars, aes(x=mpg, y=qsec, col=factor(cyl), shape=factor(am)))+
+geom_point()
+```
+
+```{r}
+# Add mapping: (hp/wt) onto size
+ggplot(mtcars, aes(x=mpg, y=qsec, col=factor(cyl),shape=factor(am), size=(hp/wt)))+
+geom_point()
+```
+
+# Ejercicio
+
+-   Utilizando el dataset de diamonds
+
+    -   Haz un scatter plot de la variable carat respecto a price
+
+    -   Haz otra visualización igual que la anterior pero añadiendo una línea de tendencia
+
+    -   Haz una visualización como la primera añadiendo el color en función de la variable clarity
+
+    -   Haz un histograma de la variable carat
+
+    -   Añadele a la gráfica anterior que el color esté definido por la variable cut (fill=cut)
+
+    -   Divide la gráfica utilizando facet_grid con la variable cut
+
+```{r}
+diamonds
+```

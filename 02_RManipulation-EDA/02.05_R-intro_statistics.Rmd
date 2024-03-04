@@ -1,0 +1,46 @@
+# Estadísticos en R
+
+```{r}
+#install.packages("moments")
+library(moments)
+head(mtcars)
+```
+
+```{r}
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+mean(mtcars$mpg)
+sd(mtcars$mpg)
+var(mtcars$mpg)
+median(mtcars$mpg)
+Mode(mtcars$mpg)
+min(mtcars$mpg)
+max(mtcars$mpg)
+quantile(mtcars$mpg)
+kurtosis(mtcars$mpg)
+skewness(mtcars$mpg)
+```
+
+```{r}
+library(tidyverse)
+select_if(mtcars, is.numeric) %>% cov
+```
+
+```{r}
+select_if(mtcars, is.numeric) %>% cor
+```
+
+```{r}
+set.seed(123)
+randomvecs<-function(N){
+ x1=rnorm(N); x2=rnorm(N); x3=rnorm(N)
+ return(data.frame(Va=x1,Vb=x1+x2,Vc=x1+x2+x3))
+}
+
+df<-randomvecs(20)
+cov(df)
+sapply(df,sd)
+```

@@ -1,0 +1,128 @@
+# Modelos de clasificación
+
+A continuación veremos cómo se realizan modelos de clasificación con R.
+
+```{r}
+#install.packages("class")
+#install.packages("naivebayes")
+#install.packages("yardstick")
+
+library(caret)
+library(naivebayes)
+library(class)
+library(Metrics)
+library("tidyverse")
+library('yardstick')
+
+
+```
+
+Para ello usaremos el dataset de madfhantr que contiene información para la concesión de préstamos.
+
+```{r}
+url_file = "https://raw.githubusercontent.com/zng489/Decision_trees_and_Random-Forest-madfhantr-/main/madfhantr.csv"
+df<- read.csv2(url_file,sep=",")
+rownames(df) <- df$Loan_ID
+df$Loan_Status <- as.factor(df$Loan_Status)
+df$CoapplicantIncome <- as.numeric(df$CoapplicantIncome) 
+df$Loan_ID = NULL
+head(df)
+```
+
+```{r}
+indexes <- sample(1:nrow(df), 0.8*nrow(df))
+train <- df[indexes,]
+test <- df[-indexes,]
+```
+
+**Regresión logística**
+
+La función glm permite hacer la regresión logística.
+
+```{r}
+m <- glm(Loan_Status ~ .,           data = train,           family = "binomial")
+
+summary(m)
+```
+
+```{r}
+prob <- predict(m, test,          type = "response")
+pred <- ifelse(prob > 0.50, 1, 0)
+table(pred,test$Loan_Status)
+```
+
+**Knn**
+
+Para usar knn es necesario instalar la librería class. El funcionamiento es:
+
+`pred <- knn(training_data, testing_data, training_labels)`
+
+```{r}
+
+df <- data(iris) ##carga de datos
+head(iris) ## vemos la estructura
+```
+
+**Ejercicio**
+
+Crea una función que normalice de 0 a 1. Aplica la función a las variables independientes del dataset iris y guardalo como un data frame.
+
+Posteriormente, divide el dataset en train y test.
+
+```{r}
+## SOLUCION
+# define la función normalize
+normalize <- function(x) {return((x - min(x)) / (max(x) - min(x)))}
+# aplica la función a las features del dataset iris
+features <- as.data.frame(lapply(iris[,c(1,2,3,4)],normalize))
+# Posteriormente, divide el dataset entre train y test. Divide en 90% el train y 
+# 10% test. Genera X_train, X_test, y_train e y_test
+indexes <- sample(1:nrow(iris), 0.9*nrow(iris))
+X_train <- features[indexes,]
+X_test <- features[-indexes,]
+y_train <- iris$Species[indexes]
+y_test <- iris$Species[-indexes]
+```
+
+```{r}
+k = 13
+
+predicts <- knn(X_train,X_test,cl=y_train,k=k)
+
+```
+
+Veamos la matriz de confusión
+
+```{r}
+tab <- table(predicts,y_test)
+tab
+```
+
+```{r}
+Metrics::accuracy(y_test,predicts)
+```
+
+```{r}
+Metrics::precision(as.numeric(y_test),as.numeric(predicts))
+Metrics::recall(as.numeric(y_test),as.numeric(predicts))
+
+```
+
+Ejemplo con caret
+
+```{r}
+m<-train(x=iris[,-5], y=iris$Species,
+                      method = 'knn',)
+summary(m)
+```
+
+## **Ejercicio**
+
+Haz un modelo de clasificación con los datos de la librería library(ISLR)-\> Default.
+
+```{r}
+
+library(ISLR)
+
+y<-Default$default
+```

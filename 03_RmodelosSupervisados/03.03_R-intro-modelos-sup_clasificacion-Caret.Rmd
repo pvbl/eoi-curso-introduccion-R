@@ -1,0 +1,169 @@
+# Modelo de clasificación con Caret
+
+A continuación realizamos todo el proceso de clasificación utilizando la librería CARET. Primero utilizaremos DataExplorer para analizar el dataset.
+
+```{r}
+#install.packages("caTools")
+library("tidyverse")
+library("NHANES")
+library("DataExplorer")
+library('rsample')
+library('caret')
+library(caTools)
+```
+
+```{r}
+url <- "https://raw.githubusercontent.com/steviep42/bios534_spring_2020/master/data/pima.csv"
+
+data <-read_csv(url)
+data$diabetes <- as.factor(data$diabetes)
+dim(data)
+```
+
+```{r}
+head(data)
+```
+
+```{r}
+
+
+glimpse(data)
+plot_missing(data)
+```
+
+```{r}
+plot_intro(data)
+```
+
+```{r}
+plot_boxplot(data,by="diabetes")
+```
+
+**Preprocesamiento & Modelización**
+
+```{r}
+
+
+set.seed(8675309)
+
+train_test_split <- initial_split(data, prop = 3/4, strata = "diabetes") 
+
+TRAIN <- training(train_test_split)
+TEST <- testing(train_test_split)
+
+# OJO ESTO NO ES NECESARIO PARA ESTOS DATOS
+# hacemos transformacion dummy de las variables tipo factor
+dV <- dummyVars(diabetes ~ .,  TRAIN)
+
+# introducimos el dataset transformado en dV.TRAIN
+dV.TRAIN <- predict(dV, TRAIN)
+```
+
+```{r}
+# hacemos igual pero imputando los NaNs
+pP <- preProcess(dV.TRAIN, method = c('knnImpute', 'center', 'scale'))
+pP
+
+pP.dV.TRAIN <- predict(pP, dV.TRAIN)
+
+```
+
+```{r}
+
+
+trControl <- trainControl(method = 'repeatedcv',
+                          number = 5,
+                          repeats =  5,
+                          search = 'random')
+
+logit.CV <- train(x=pP.dV.TRAIN, y=TRAIN$diabetes,
+                  method = 'glmnet',
+                  trControl = trControl,
+                  family = 'binomial' )
+
+logit.CV
+plot(logit.CV)
+
+```
+
+```{r}
+dV.TEST <- predict(dV, TEST)
+pP.dV.TEST <- predict(pP, dV.TEST)
+
+```
+
+```{r}
+pm_glm_pred_labels <- predict(logit.CV,pP.dV.TEST)
+
+mytab <- table(pm_glm_pred_labels,TEST$diabetes)
+mytab
+```
+
+```{r}
+sum(diag(mytab))/sum(mytab)
+
+```
+
+```{r}
+
+probs <- predict(logit.CV,pP.dV.TEST,type="prob")[,2]
+caTools::colAUC(probs,TEST$diabetes)
+
+```
+
+```{r}
+
+caTools::colAUC(probs,TEST$diabetes,plotROC = TRUE)
+
+```
+
+**Ejercicio**
+
+Haz un análisis exploratorio y modelización del dataset de diabetes que se puede encontrar uno al cargar NHANES. Para ello:
+
+1.  Carga el dataset de la librería NHANES.
+2.  Analiza los mising values.
+3.  Genera la variable data\<-NHANES con las features del dataset: select(TotChol,UrineVol1,Poverty,Weight,Height,BMI,Gender,Age,Race1,BPDiaAve,Pulse,BPSysAve,Depressed,SleepTrouble,Diabetes)
+4.  Elimina todos los NaNs del target Diabetes
+5.  Pon un seed de 1
+6.  Divide los datos en 0.75-0.25 train-test manteniendo proporciones del target de la columna"Diabetes"
+7.  Haz la misma normalización y imputación que en el ejemplo anterior.
+8.  Haz el mismo modelo glm que en el ejercicio anterior con los mismos Tr
+9.  Evalúa la curva ROC
+
+```{r}
+install.packages("NHANES")
+
+library(NHANES)
+
+## MISING DATA?
+# NHANES
+NHANES
+```
+
+```{r}
+data <- ?
+```
+
+```{r}
+set.seed(1)
+
+# train-test
+TRAIN=?
+TEST=?
+# prep
+dV <- ?
+
+
+pP <- ?
+
+
+trControl <- ?
+
+logit.CV <- ?
+```
+
+```{r}
+# eval AUC
+probs <- ?
+```

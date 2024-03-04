@@ -1,0 +1,87 @@
+# Apificación
+
+```{r}
+install.packages("plumber")
+library("plumber")
+library(jsonlite)
+```
+
+```{r}
+data(Boston, package="MASS")
+library(randomForest)
+
+# train a model for median house price as a function of the other variables
+bos_rf <- randomForest(medv ~ zn + crim + indus, data=Boston, ntree=100)
+
+# save the model
+saveRDS(bos_rf, "bos_rf.rds")
+```
+
+```{r}
+# save as bos_rf_score.R
+
+bos_rf <- readRDS("bos_rf.rds")
+library(randomForest)
+
+#* @param df data frame of variables
+#* @post /score
+function(crim,zn,indus)
+{
+    df <- data.frame(
+      crim = crim,
+      zn = zn,
+      indus = indus
+    )
+    predict(bos_rf, df)
+}
+```
+
+```{r}
+r = plumb(file = "bos_rf_score.R")
+r$run(port = 1030, host = "0.0.0.0")
+```
+
+```{r}
+toJSON(Boston[1,1:3])
+```
+
+```{r}
+newdata = toJSON(Boston[1,1:3])
+resp = httr::POST(url = "http://127.0.0.1:1030/score",
+                  body = newdata, encode = "json")
+httr::content(resp)
+
+```
+
+**DockerFile**
+
+```{bash}
+
+# example Dockerfile to expose a plumber service
+
+FROM trestletech/plumber
+
+# install the randomForest package
+RUN R -e 'install.packages(c("randomForest"))'
+
+# copy model and scoring script
+RUN mkdir /data
+COPY bos_rf.rds /data
+COPY bos_rf_score.R /data
+WORKDIR /data
+
+# plumb and run server
+EXPOSE 8000
+ENTRYPOINT ["R", "-e", \
+    "pr <- plumber::plumb('/data/bos_rf_score.R'); pr$run(host='0.0.0.0', port=8000)"]
+```
+
+**Ejercicio**
+
+Utiliza el modelo generado para el dataset de la diabetes:
+
+-   Guardalo en un modelo .rsd
+
+-   Crea una API para consumir el mismo
+
+-   Haz una llamada a la API de ejemplo para ver que funciona.

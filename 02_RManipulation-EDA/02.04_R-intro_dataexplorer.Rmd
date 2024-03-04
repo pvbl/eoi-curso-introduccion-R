@@ -1,0 +1,71 @@
+# Análisis de datos con data Explorer
+
+```{r}
+#install.packages("DataExplorer")
+library(DataExplorer)
+library(tidyverse)
+
+```
+
+Información de las variables del dataset
+
+```{r}
+head(mtcars)
+```
+
+```{r}
+plot_str(mtcars)
+
+```
+
+```{r}
+plot_intro(mtcars, 
+           title ="Intro mtcars", 
+           ggtheme =theme_light(), 
+           theme_config=theme(legend.position="bottom"))
+```
+
+```{r}
+plot_missing(starwars)
+```
+
+```{r}
+plot_histogram(starwars)
+
+```
+
+```{r}
+plot_qq(mtcars)
+```
+
+```{r}
+plot_boxplot(mtcars,by="mpg")
+```
+
+```{r}
+
+plot_correlation(mtcars)
+
+```
+
+```{r}
+mtcars_exclude_12 <- drop_columns(mtcars, 1:2) #removes columns 1 and 2
+mtcars_exclude_12 <- update_columns(mtcars_exclude_12, "brand", as.factor)
+
+```
+
+```{r}
+configurations <-configure_report(
+  add_plot_histogram = FALSE, #excluding some plots
+  add_plot_str = FALSE,
+  add_plot_qq = FALSE,
+  add_plot_correlation = FALSE,
+  add_plot_prcomp= FALSE,
+  add_plot_boxplot = FALSE,
+  global_ggtheme = theme_bw() #setting theme
+) 
+create_report(mtcars, 
+              y = "mpg", #choose a response variable
+              config = configurations, 
+              report_title= "mtcars Dataset Report") 
+```

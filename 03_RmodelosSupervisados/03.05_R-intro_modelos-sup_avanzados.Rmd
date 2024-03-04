@@ -1,0 +1,304 @@
+# Modelos de árboles de decisión
+
+```{r}
+#install.packages(c("xgboost","randomForest","rpart","rpart.plot"))
+library(rpart)
+library(rpart.plot)
+library(tidyverse)
+library(caret)
+library(DataExplorer)
+library(randomForest)
+library(ggplot2)
+library(xgboost)
+library('rsample')
+
+```
+
+Vamos a hacer un modelo para predecir si debemos o no conceder un préstamo a un cliente.
+
+```{r}
+url_file = "https://raw.githubusercontent.com/zng489/Decision_trees_and_Random-Forest-madfhantr-/main/madfhantr.csv"
+df<- read.csv2(url_file,sep=",",dec = ".")
+head(df)
+```
+
+```{r}
+
+# ponemos como id el loan_id
+rownames(df) <- df$Loan_ID
+
+df$Loan_Status <- as.factor(df$Loan_Status)
+df$CoapplicantIncome <- as.numeric(df$CoapplicantIncome) 
+# convertimos las variables siguientes a factores
+# ojo! qué pensáis que falta aquí?
+cols_factor <- c("Gender","Married","Dependents","Education","Self_Employed","Property_Area")
+
+df<- df %>%
+       mutate_each_(funs(factor(.)),cols_factor)
+
+#df$Dependents <- as.factor(df$Dependents, levels=())
+df$Loan_ID = NULL
+head(df)
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+nrow(df)
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+plot_missing(df)
+```
+
+```{r}
+prop.table(table(df$Loan_Status))
+```
+
+**Árboles de decision**
+
+```{r}
+set.seed(123)
+#indexes <- sample(1:nrow(df), 0.8*nrow(df))
+#train <- df[indexes,]
+#test <- df[-indexes,]
+```
+
+**Ejercicio**
+
+Divide en train-test utilizando rsample (initial_split) y mateniendo proporciones de la variable Loan_Status
+
+```{r}
+train_test_split <- initial_split(df, prop = 3/4, strata = "Loan_Status")
+
+train <- training(train_test_split)
+test <- testing(train_test_split)
+
+```
+
+```{r}
+nrow(train)
+nrow(test)
+```
+
+```{r}
+tree <- rpart(Loan_Status ~ ., data = train, method = 'class')
+```
+
+```{r}
+tree
+```
+
+```{r}
+plot(tree)
+```
+
+```{r}
+rpart.plot(tree)  
+
+```
+
+```{r}
+rpart.rules(tree, style = "tall")
+
+```
+
+```{r}
+importance <- tree$variable.importance # Equivalente a caret::varImp(tree) 
+importance <- round(100*importance/sum(importance), 1)
+importance[importance >= 1]
+
+```
+
+```{r}
+varImp(tree,scale = FALSE)
+```
+
+**Random Forest**
+
+Preprocesamiento RF
+
+```{r}
+
+df<- rfImpute(Loan_Status~.,df)
+```
+
+```{r}
+set.seed(123)
+indexes <- sample(1:nrow(df), 0.8*nrow(df))
+train <- df[indexes,]
+test <- df[-indexes,]
+```
+
+Modelo
+
+```{r}
+rfmodel <- randomForest(Loan_Status~.,data=df)
+rfmodel
+```
+
+```{r}
+
+modelLookup("rf")
+
+
+ctrl <- trainControl(method = "cv", 
+                     number = 5,
+                     classProbs = T,
+                     summaryFunction = twoClassSummary)
+
+loanModel_rf <- train(form = Loan_Status ~ .,
+                    data = train,
+                    trControl = ctrl,
+                    metric = "ROC",
+                    method = "rf")
+loanModel_rf
+```
+
+Ejercicio:¿Te sale un error? ¿Cúal es? ¿Podrías solventarlo? Sobrescribe las variables train y test con la solución
+
+```{r}
+imputer <- preProcess(train, method = c('knnImpute', 'center', 'scale'))
+train <- predict(imputer, train)
+test <- predict(imputer, test)
+```
+
+Volvemos a ejecutar el modelo con la corrección
+
+```{r}
+ctrl <- trainControl(method = "cv", 
+                     number = 5,
+                     classProbs = T,
+                     summaryFunction = twoClassSummary)
+
+loanModel_rf <- train(form = Loan_Status ~ .,
+                    data = train,
+                    trControl = ctrl,
+                    metric = "ROC",
+                    method = "rf")
+loanModel_rf
+```
+
+```{r}
+plot(loanModel_rf)
+```
+
+```{r}
+loanModel_rf$bestTune
+```
+
+```{r}
+varImp(loanModel_rf,scale = FALSE)
+```
+
+```{r}
+ggplot(varImp(loanModel_rf,scale = FALSE))
+```
+
+```{r}
+pred <- predict(loanModel_rf, newdata = test)
+caret::confusionMatrix(pred, test$Loan_Status)
+```
+
+**(OPCIONAL) Partial Dependency Plots**
+
+```{r}
+library(gridExtra)
+#install.packages("pdp")
+library(pdp)
+pdp1 <- partial(loanModel_rf, "ApplicantIncome")
+p1 <- plotPartial(pdp1)
+pdp2 <- partial(loanModel_rf, c("LoanAmount"))
+p2 <- plotPartial(pdp2)
+grid.arrange(p1, p2, ncol = 2)
+```
+
+Random forest con la librería randomForest
+
+```{r}
+rf <- randomForest(Loan_Status ~ ., data = train)
+plot(rf)
+```
+
+**Xgboost**
+
+```{r}
+modelLookup("xgbTree")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+caret.xgb <- train(Loan_Status ~ ., method = "xgbTree", data = train,
+                   trControl = trainControl(method = "cv", number = 5))
+caret.xgb
+```
+
+```{r}
+caret.xgb$bestTune
+
+```
+
+```{r}
+confusionMatrix(predict(caret.xgb, newdata = test), test$Loan_Status)
+
+```
+
+**SVM**
+
+```{r}
+#install.packages("kernlab")
+library(kernlab)
+set.seed(1) 
+# Selección de sigma = mean(sigest(taste ~ ., data = train)[-2]) # depende de la semilla
+svm <- ksvm(Loan_Status ~ ., data = train,
+            kernel = "rbfdot", prob.model = TRUE)
+svm
+```
+
+**Ejercicio**
+
+Evalúa las métricas del modelo. Haz la matriz de confusión.
+
+¿Qué diferencias ves con rpart y las demás librerías?
+
+```{r}
+confusionMatrix(predict(svm, newdata = test), test$Loan_Status)
+
+```
+
+**Ejercicio**
+
+Haz un modelo de clasificación de diabetes usando árboles de decisión, random Forest y Xgboost. Para ello usa los datos del ejercicio 03.03. NHANES de diabetes.
+
+1.  Para hacer el árbol de decisión, random forest y Xgboost utiliza la librería caret. (Busca en internet como aplicar para estos modelos).
+2.  A posteriori, para cada uno de esos modelos, predice sobre el TEST y calcula el accuracy y el f1 score.
+3.  Guarda la información en un dataframe en el que las filas sean los modelos y las columnas el accuracy y el f1 score de cada uno.
+
+```{r}
+library(NHANES)
+data <- NHANES %>% select(TotChol,UrineVol1,Poverty,Weight,Height,BMI,Gender,Age,Race1,BPDiaAve,Pulse,BPSysAve,Depressed,SleepTrouble,Diabetes) %>% drop_na(Diabetes)
+head(data)
+```
+
+```{r}
+library('caret')
+
+set.seed(123)
+
+
+trControl <- trainControl(method = 'repeatedcv',
+                          number = 5,
+                          repeats =  5,
+                          search = 'random')
+```
+
+creamos dataframe con las métricas de accuracy y f1 score
+
+```{r}
+metrics_df?
+```

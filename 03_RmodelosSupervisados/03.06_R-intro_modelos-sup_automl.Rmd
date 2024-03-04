@@ -1,0 +1,105 @@
+# AutoML
+
+```{r}
+#install.packages("h2o")
+library(h2o)
+```
+
+```{r}
+h2o.init()
+
+```
+
+```{r}
+h2o.no_progress()  # Turn off progress bars for notebook readability
+
+```
+
+```{r}
+
+df<-as.h2o(iris)
+h2o.describe(df)
+```
+
+```{r}
+y <- "Species"
+splits <- h2o.splitFrame(df, ratios = 0.8, seed = 1)
+train <- splits[[1]]
+test <- splits[[2]]
+head(train)
+```
+
+```{r}
+aml <- h2o.automl(y = y,
+                  training_frame = train,
+                  leaderboard_frame = test,
+                  max_runtime_secs = 180,
+                  seed = 1,
+                  stopping_metric = "AUC", 
+                  stopping_rounds = 10, 
+                  stopping_tolerance = 0.02, 
+                  max_models = 10,
+                  sort_metric = "AUC",
+                  project_name = "iris_model2",
+                  include_algos = c("GLM", "DRF", "GBM"))
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+#print(aml@leaderboard)
+
+```
+
+```{r}
+models_glm_best <- aml@leader#h2o.getModel(aml@model_ids[[1]])
+models_glm_best@allparameters
+
+```
+
+```{r}
+pred <- h2o.predict(aml, test)  # predict(aml, test) and h2o.predict(aml@leader, test) also work
+head(pred)
+```
+
+```{r}
+perf <- h2o.performance(aml@leader, test)
+perf
+```
+
+```{r}
+plot(perf, type="roc", main="ROC Curve for Best Logistic Regression Model")
+
+```
+
+```{r}
+h2o.varimp(models_glm_best)
+
+```
+
+```{r}
+df <- as.data.frame(h2o.varimp(aml@leader))
+print(df)
+```
+
+Ejercicio
+
+Aplica sobre el dataset de Diabetes. Incluye los algoritmos tipo GLM, DRF, GBM.
+
+Evalúa el resultado
+
+```{r}
+library(NHANES)
+
+data <- NHANES %>% select(TotChol,UrineVol1,Poverty,Weight,Height,BMI,Gender,Age,Race1,BPDiaAve,Pulse,BPSysAve,Depressed,SleepTrouble,Diabetes) %>% drop_na(Diabetes)
+
+
+```
+
+```{r}
+
+```

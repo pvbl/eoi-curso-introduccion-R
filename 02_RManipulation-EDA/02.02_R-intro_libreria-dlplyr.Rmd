@@ -1,0 +1,219 @@
+# Introducción a la manipulación de datos con Dlplyr
+
+Durante esta sesión veremos cómo podemos manipular datos utilizando la librería Dlply. Para ello trabajaremos con un dataset de las elecciones de Estados Unidos.
+
+**Instalación de librerías**
+
+```{r}
+# Instala las librerías dlplyr, lubridate, ggplot2, zoo y luego en otra celda cárgalas.
+```
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(zoo)
+library(ggplot2)
+```
+
+ponemos path de trabajo
+
+```{r}
+#setwd("~/Documentos/CursoR/02_Rbasics/")
+
+```
+
+Cargamos los datos
+
+```{r}
+approval_polls <-read.csv("data/polls.csv",sep = ";")
+
+```
+
+\# hacemos un pequeño insight de los datos
+
+```{r}
+head(approval_polls)
+```
+
+Vemos el número de datos que tiene
+
+```{r}
+print("numero de observaciones")
+print(nrow(approval_polls))
+print("número de columnas")
+ncol(approval_polls)
+```
+
+Con la librería dlplyr podemos seleccionar columnas mediante pipes
+
+```{r}
+
+# seleccionamos columnas
+approval_polls %>% 
+  select("President","Date","Approve") %>%
+  head()
+
+# de otra manera
+approval_polls %>% 
+  select(President,Date,Approve) %>%
+  head()
+
+```
+
+## Filtros
+
+```{r}
+# filtramos solo para Trump
+approval_polls %>% 
+  select(President,Date,Approve) %>%
+  filter(President == "Trump")
+# ejercicio, filtra para  hillary
+```
+
+Evaluamos el promedio por presidente
+
+```{r}
+
+# evaluemos por presidentes el promedio de su nota
+approval_polls %>%
+  group_by(President) %>%
+  summarise(Approve_mean = mean(Approve))
+
+```
+
+Podemos extraer la columna approve y hacer el mismo cálculo de antes
+
+```{r}
+
+# Podemos extraer la Approve columna como vector
+# y guardarlo como una columna con pull
+TrumpApproval <- approval_polls %>% 
+  select(President,Date,Approve) %>%
+  filter(President == "Trump") %>%
+  pull(Approve)
+# si hacemos promedio vemos lo de antes
+mean(TrumpApproval)
+```
+
+## Tratamiento de fechas con lubridate
+
+usamos lubridate package para formatear fechas
+
+```{r}
+
+# Seleccionamos columnas President, Date, Approve de approval_polls y filtramos por la presidencia de Trump
+TrumpPolls <- approval_polls %>% 
+  select(President,Date,Approve) %>%
+  filter(President == "Trump")
+
+
+```
+
+usamos months() y mdy() para extraer el mes donde se ha realizado la encuesta
+
+```{r}
+
+# Agrupamos por mes y hacemos un resumen de Approve
+TrumpPolls %>%
+  mutate(Month = months(mdy(Date))) %>%
+  group_by(Month) %>%
+  summarise(Approve = mean(Approve))
+
+```
+
+```{r}
+
+# guardamos el approval de Trump modificando la fecha y ordenando por la misma
+TrumpApproval <- approval_polls %>% 
+  filter(President == "Trump") %>%
+  mutate(Date = mdy(Date)) %>%
+  arrange(Date) 
+
+TrumpApproval
+```
+
+(Adicional): Utilizamos el paquete zoo para obtener el rolling mean de las últimas 10 encuestas
+
+```{r}
+TrumpApproval <- TrumpApproval %>%
+  mutate(AvgApprove = rollmean(Approve, 10, na.pad=TRUE, align = "right"))
+
+# usamos ggplot para plotear los datos
+ggplot(data = TrumpApproval, aes(x=Date,y=AvgApprove)) + 
+  geom_line()+ggtitle("Trump Approval") + xlab("Dias") +
+  ylab("Avg Aprrove") 
+
+```
+
+```{r}
+
+
+# Hacemos lo mismo ahora para todos los presidentes
+AllApproval <- approval_polls %>%
+  group_by(President) %>%
+  mutate(AvgApprove = rollmean(Approve, 10, na.pad=TRUE, align = "right"))
+
+
+# ploteamos
+ggplot(data = AllApproval, aes(x=Days, y=AvgApprove, col=President)) + 
+  geom_line()+ggtitle("All Approval")
+
+
+```
+
+## Ejercicio 1
+
+-   Realiza el promedio para cada presidente de la columna Disapprove
+
+-   Filtra los datos para Clinton
+
+-   Haz un promedio por año de Disapprove del presidente Clinton
+
+-   Ordena por fecha
+
+<!-- -->
+
+## Ejercicio 2
+
+-   Carga el dataframe mtcars. Evalúa el número de observaciones y columnas
+
+-   filtra el dataframe por los coches Mazda de manera insensitiva
+
+-   Agrupa el dataframe por la variable cyl y mira el promedio de mpg.
+
+-   Agrupa también por cyl y gear y mira el promedio de mpg
+
+-   Convierte todos los índices de las filas a lower, divide el string por un espacio y extrae el primer valor del mismo (mira en internet cómo hacer esto). Crea una nueva variable que sea brand.
+
+-   Agrupa por brand y calcula el valor medio de mpg. Encuentra la marca con mayor valor medio de mpg.
+
+-   Evalúa cuantos valores nulos hay en el data frame
+
+# Librería dplyr y `tidyverse`
+
+Dplyr es una librería para la manipulación de datos
+
+```{r}
+library(dplyr)
+library(tidyverse)
+```
+
+```{r}
+head(starwars, 5)
+
+```
+
+```{r}
+starwars %>% filter(eye_color == "brown" | eye_color =="blue")
+
+```
+
+```{r}
+starwars %>% drop_na()
+```
+
+```{r}
+starwars %>%
+  replace_na(list(mass=0,hair_color=mode(starwars$hair_color))) %>%
+   mutate(height = height / 1000)
+```

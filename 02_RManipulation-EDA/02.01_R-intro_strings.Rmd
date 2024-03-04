@@ -1,0 +1,137 @@
+# Strings
+
+A continuación haremos transformaciones con strings con R.
+
+```{r}
+
+str1 <- "En un lugar de la Mancha, "
+
+str2 <- 'de cuyo nombre no quiero acordarme,
+no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero,'
+
+str3 <- 'adarga antigua, "rocín flaco" y galgo corredor."'
+```
+
+Podemos mostrar los strings con print
+
+```{r}
+print(str1)
+print(str2)
+print(str3)
+```
+
+Sin embargo, vemos que los caracteres especiales siguen apareciendo. Para que no suceda eso tenemos que utilizar el siguiente comando.
+
+```{r}
+writeLines(str1)
+writeLines(str2)
+writeLines(str3)
+```
+
+Podemos también utilizar este comando de la siguiente manera
+
+```{r}
+strs <- c(str1, str2, str3)
+writeLines(strs)
+```
+
+```{r}
+writeLines(paste(str1,str2))
+```
+
+## Número a string
+
+```{r}
+numbers<-c(1.2,2,3.45450,-5.6)
+
+numbs_form<-format(numbers,digits=2)
+writeLines(numbs_form)
+```
+
+Con formatC se puede formatear al estilo de C
+
+```{r}
+formatC(numbers, format = "f", digits = 1)
+formatC(numbers, format = "f", digits = 1, flag="+")
+
+```
+
+## Concatenar strings
+
+```{r}
+print(paste("Hola", "Mar", sep= " "))
+
+lstr<- c("Hola"," Mar")
+print(lstr)
+
+str_c <- paste(lstr, sep=" ", collapse = '') # collapse para vectores
+print(str_c)
+```
+
+## Librería Stringr
+
+```{r}
+library(stringr)
+```
+
+A continuación vamos a hacer operaciones sobre strings
+
+```{r}
+lstr<- c("Hello", "Mar","la","vida","es","una","lenteja")
+# tamaño de strings en una lista
+print("str_length...")
+
+stringr::str_length(lstr)
+# extraer un substring
+print("str_sub...")
+stringr:: str_sub(lstr, 1, 4)
+# detectar un patrón
+print("str_detect...")
+stringr:: str_detect(lstr, pattern = fixed("una"))
+
+```
+
+A continuación dividimos los strings por un patrón
+
+```{r}
+
+date_ranges <- c("23.01.2022 - 29.01.2022", "30.01.2022 - 06.02.2022")
+
+# Split dates using " - "
+split_dates <- str_split(date_ranges, pattern = fixed(" - "))
+
+# Print split_dates
+split_dates
+```
+
+Remplazamos
+
+```{r}
+telfs<-c("mobile: 623 234 234 ","mobile: 654 654 654 ")
+id_nums <- str_replace(telfs, 'mobile:', "")
+id_nums
+id_nums <- str_trim(id_nums)
+id_nums
+
+```
+
+## Ejercicios
+
+A continuación se dejan unos ejercicios para realizar:
+
+1.  Instala la librería babynames y cargala
+
+2.  Visualiza la variable babynames, calcula el número de filas y columnas que tiene
+
+3.  Filtra en el dataset los bebes del año 2014
+
+4.  A continuación crea dos dataframes distintos: uno que contenga los del sexo F y otros del sexo M.
+
+5.  Calcula cual es el tamaño promedio de los nombres para cada uno de los sexos.
+
+6.  Calcula cuantos nombres empiezan por M para los dos datasets
+
+7.  Calcula cuantos nombres masculinos y femeninos terminan en e.
+
+```{r}
+```

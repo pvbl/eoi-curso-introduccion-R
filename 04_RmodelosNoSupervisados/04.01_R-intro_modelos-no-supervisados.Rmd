@@ -1,0 +1,120 @@
+# Modelos no supervisados
+
+```{r}
+#install.packages("dbscan")
+library(ggplot2)
+library(dbscan)
+library(tidyverse)
+```
+
+```{r}
+df<-iris
+head(df)
+```
+
+```{r}
+ggplot(df, aes(Petal.Length, Petal.Width)) + geom_point(aes(col=Species), size=4)
+
+```
+
+```{r}
+normalize <- function(x){
+  return ((x-min(x))/(max(x)-min(x)))
+}
+df[,c(1:4)]<-lapply(df[,c(1:4)],normalize)
+```
+
+```{r}
+colMeans(df[,c(1:4)])
+```
+
+```{r}
+prop.table(table(df$Species))
+
+```
+
+```{r}
+set.seed(101)
+cluster_mod <- kmeans(df[,1:4], center=3, nstart=20)
+cluster_mod
+```
+
+```{r}
+table(cluster_mod$cluster, df$Species)
+
+```
+
+```{r}
+#install.packages("cluster")
+library(cluster)
+clusplot(iris, cluster_mod$cluster, color=T, shade=T, labels=0, lines=0)
+```
+
+```{r}
+tot.withinss <- vector(mode="character", length=10)
+for (i in 1:10){
+  clusterM <- kmeans(df[,1:4], center=i, nstart=20)
+  tot.withinss[i] <- clusterM$tot.withinss
+}
+```
+
+```{r}
+plot(1:10, tot.withinss, type="b", pch=19)
+
+```
+
+**Cluster jerárquico**
+
+```{r}
+hc = hclust(dist(df[,c(1:4)]), method = "ward.D")
+hc
+```
+
+```{r}
+plot(hc, hang = -5)
+
+```
+
+**DBSCAN**
+
+```{r}
+
+dbscanM=dbscan(df[,c(1:4)], eps=0.2, minPts = 3)
+
+df$clusterDB=dbscanM$cluster
+
+ggplot(df,aes(Petal.Length, Petal.Width,color=as.factor(clusterDB)))+geom_point()
+
+```
+
+**PCA**
+
+```{r}
+pcaM <- prcomp(df[,c(1:4)], center = TRUE, scale = TRUE)
+print(pcaM)
+```
+
+```{r}
+plot(pcaM, type='l')
+
+```
+
+```{r}
+summary(pcaM)
+
+```
+
+**Ejercicio**
+
+A continuación se da un dataset de vinos.
+
+1.  Elimina las variables que no sean numéricas y normaliza los datos.
+2.  Haz un modelo de k-means y prueba distintos tipos de k para luego analizar con la gráfica de codo cual es el más adecuado. Tras elegir uno, haz un modelo con ese número de clusters.
+3.  Haz un modelo de cluster jerárquico y define qué número de clusters es más adecuado. ¿Coincide con el de k-means?
+4.  Haz un modelo de DBScan. ¿Si mantenemos el epsilon de 0.2 qué sucede?¿ Y si ponemos uno de 0.5? Evalúa para eso cuantas observaciones caen en cada cluster.
+
+```{r}
+#install.packages('rattle')
+data(wine, package='rattle')
+head(wine)
+```

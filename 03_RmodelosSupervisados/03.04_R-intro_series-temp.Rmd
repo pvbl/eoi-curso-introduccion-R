@@ -1,0 +1,121 @@
+# Series temporales
+
+A continuación veremos un caso de uso con series temporales.
+
+```{r}
+install.packages(c("tseries","forecast"))
+
+library(ggfortify)
+
+library(tseries)
+library(forecast)
+```
+
+Para el análisis de series temporales usaremos el dataset AirPassengers.
+
+```{r}
+head(AirPassengers)
+```
+
+Vemos que es del tipo serie temporal
+
+```{r}
+class(AirPassengers)
+
+```
+
+```{r}
+plot(AirPassengers)
+
+```
+
+Aplicamos algunas funciones para series temporales que nos permiten entender mejor la serie.
+
+```{r}
+start(AirPassengers)
+end(AirPassengers)
+frequency(AirPassengers)
+deltat(AirPassengers)
+
+```
+
+```{r}
+head(time(AirPassengers))
+
+```
+
+```{r}
+# Check the cycle of the time series
+cycle(AirPassengers)
+
+```
+
+```{r}
+summary(AirPassengers)
+```
+
+Hacemos una gráfica de la ts utilizando ggfortify
+
+```{r}
+# mediante ggfortify
+autoplot(AirPassengers) + labs(x ="Fecha", y = "Número de pasajeros (1k)", title="Pasajeros") 
+
+```
+
+Podemos también hacer boxplot agrupado por meses.
+
+```{r}
+boxplot(AirPassengers~cycle(AirPassengers),xlab="Fecha", ylab = "Número de pasajeros (1k)" ,main ="Pasajeros")
+```
+
+Descomponemos la serie temporal.
+
+```{r}
+decomposeAP <- decompose(AirPassengers,"multiplicative")
+autoplot(decomposeAP)
+```
+
+Test de estacionalidad
+
+```{r}
+adf.test(AirPassengers) 
+
+```
+
+El valor de p es menor del 5% por lo que podemos rechazar la hipótesis nula. Por lo tanto la serie es estacional.
+
+Veamos un test ACF.
+
+```{r}
+autoplot(acf(AirPassengers,plot=FALSE))+ labs(title="Correlograma") 
+
+```
+
+## Modelización
+
+Utilizamos un auto Arima para calcular de manera automática los parámetros del modelo.
+
+```{r}
+arimaAP <- auto.arima(AirPassengers)
+arimaAP
+```
+
+```{r}
+ggtsdiag(arimaAP)
+
+```
+
+```{r}
+par(mfrow=c(1, 2), mar = c(3, 5, 0, 0), oma = c(0, 0, 0.5, 0.5))
+acf(residuals(arimaAP), ylab="ACF ATM1"); pacf(residuals(arimaAP), ylab="PACF ATM1")
+```
+
+```{r}
+# level-> nivel conf
+forecastAP <- forecast(arimaAP, level = c(95), h = 36)
+autoplot(forecastAP)
+```
+
+**Ejercicio**
+
+Haz un analísis y modelo con el dataset del Nile.

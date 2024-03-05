@@ -1,0 +1,242 @@
+---
+title: "01_Rbasics-ejercicios.Rmd"
+output: html_document
+date: "2024-03-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Ejercicios R
+
+```{r}
+animal<-c("Zorro", "Ciervo", "Conejo", "Lobo", "Oso")
+
+tamanho_cm<-c(50, 80, 40, 75, 90)
+
+peso_kg<-c(5, 12, 2, 8, 15)
+
+peligro_v<- c("No peligroso", "No peligroso", "No peligroso", "Peligroso", "Muy peligroso")
+
+peligro<-factor( peligro_v ,ordered = TRUE, levels=c("No peligroso","Peligroso","Muy peligroso"))
+
+tamanho_m <- tamanho_cm/100
+
+tamanho_pul <- tamanho_cm/2.54
+```
+
+Crea otra variable que sea peso/tamaño (kg/cm).
+
+Utiliza la variable peligroso para filtrar qué animales son menos que "Muy peligrosos".
+
+Junta todos los datos en una matriz, que tenga las variables como columnas.
+
+Calcula las sumas y promedios de las variables tamnho_cm y peso_kg
+
+Selecciona el elemento de la matriz que contiene el elemento del tamanho del zorro.
+
+```{r}
+pesotam<- peso_kg/tamanho_m
+
+mat <- matrix(c (animal,tamanho_cm,peso_kg, peligro_v, tamanho_m, tamanho_pul ), byrow=FALSE, nrow =5)
+
+mat[1,2]
+```
+
+```{r}
+rownames(mat)<- animal
+mat
+```
+
+Utiliza la variable peligroso para filtrar qué animales son menos que "Muy peligrosos".
+
+Junta todos los datos en una matriz, que tenga las variables numéricas como columnas.
+
+Calcula las sumas y promedios de las variables tamnho_cm y peso_kg
+
+Selecciona el elemento de la matriz que contiene el elemento del tamanho del zorro.
+
+Añade una nueva columna a la matriz que sea n_observaciones que sea para el zorro 20, ciervo 10, conejo 50, lobo 15 y Oso 3.
+
+```{r}
+animal[peligro<"Muy peligroso"]
+
+mtp <- matrix(c(tamanho_cm,peso_kg),nrow= 5, byrow = FALSE )
+rownames(mtp) <- animal
+mtp
+```
+
+```{r}
+colSums(mtp)
+colMeans(mtp)
+```
+
+```{r}
+mtp[1,1]
+```
+
+```{r}
+nobs <- c(20, 10, 50, 15, 3)
+mtp <- cbind(mtp,nobs)
+mtp
+```
+
+A partir de las variables del ejercicio anterior: animal, tamanho_cm, peso_kg, peligroso, genera un data frame llamado animals_info.
+
+Crea un dataframe llamado animals_info_ord que tenga los valores ordenados por peso_kg de menor a mayor.
+
+Investiga la estructura del dataframe animals_info con str.
+
+Haz el promedio de las variables tamanho y peso.
+
+añade una nueva columna que sea n_observaciones que sea para el zorro 20, ciervo 10, conejo 50, lobo 15 y Oso 3.
+
+Filtra las filas con n_observaciones mayores de 10.
+
+Crea una función que convierta de cm a pulgadas y llamala cm_to_pulg
+
+Aplica la función a la variable tamanho_cm en el dataframe y crea una nueva columna que se llame tamanho_pulg.
+
+```{r}
+animals_info <-data.frame(animal, tamanho_cm, peso_kg, peligro)
+animals_info_ord <- animals_info[order(animals_info$peso_kg),]
+str(animals_info)
+```
+
+```{r}
+mean(animals_info$tamanho_cm)
+mean(animals_info$peso_kg)
+
+```
+
+```{r}
+# zorro 20, ciervo 10, conejo 50, lobo 15 y Oso 3. 
+animals_info$n_observaciones <- c(20,10,50,15,3)
+
+```
+
+```{r}
+subset(animals_info, n_observaciones>10)
+```
+
+```{r}
+cm_to_pulg<- function(x){
+  # funcion para convertir cm a pulgadas
+  return(x/2.54)
+  
+}
+animals_info$tamanho_pulg<-sapply(animals_info$tamanho_cm,cm_to_pulg)
+animals_info
+```
+
+```{r}
+
+```
+
+Se te ha proporcionado un vector con las alturas (en centímetros) de un grupo de monos. Tu tarea es crear una función que devuelva el número de veces que cada mono cae en cada categoría. Las categorías son:
+
+-Bajo: Menos de 140 cm; Medio: 140 cm a 170 cm; Alto: Más de 170 cm
+
+Por ejemplo:
+
+si pasamos c(120,120, 150), devolverá (2,1,0).
+
+Haz la prueba con el siguiente vector: c(120,130,175,175,167,120,134,155)
+
+```{r}
+counter_size <- function(vector){
+  small = 0
+  medium = 0
+  tall = 0
+  for (v in vector){
+    if (v<140){
+      small = small + 1
+    }
+    else if (v<170){
+      medium = medium + 1
+      
+    }
+    else{
+      tall = tall + 1
+    }
+    
+  }
+  return(c(small,medium,tall))
+}
+```
+
+```{r}
+counter_size(c(120,130,175,175,167,120,134,155))
+```
+
+```{r}
+mtcars
+```
+
+Existen datasets precargados en R. Mira la variable, mtcars.
+
+Utilizando lapply, calcula la media por columna. Usa luego sapply, que diferencias ves?
+
+Utilizando la función apply (mira en help la diferencia), calcula para el dataset del Titanic la suma de gente en función de la clase en la que iba. También evalúa la suma de gente que era Hombre o mujer en el dataset.
+
+```{r}
+class(lapply(mtcars,mean))
+class(sapply(mtcars,mean))
+
+```
+
+Crea una función que tenga de entrada un vector v y la salida sea el número de elementos múltiplos de 3 que contenga el mismo.
+
+```{r}
+mult3<- function(v){
+  
+  v[v%%3==0]
+  
+}
+mult3(1:15)
+```
+
+```{r}
+URL<- "https://raw.githubusercontent.com/UBC-DSCI/data/main/can_lang.csv"
+
+df <- read.csv2(URL, sep=",")
+df
+```
+
+```{r}
+sapply(df,is.numeric)
+
+```
+
+```{r}
+df_num <-df[,sapply(df,is.numeric)]
+df_num
+```
+
+```{r}
+
+get_col_means<-function(df){
+colMeans(df[, lapply(df, is.numeric) == TRUE])
+}
+
+
+filter_df<- function(df){
+  subset(df,lang_known>mean(df$lang_known))
+  
+  
+}
+
+```
+
+```{r}
+source("script.R")
+```
+
+```{r}
+filter_df_script(df)
+```
+
+```{r}
+library("dplyr")
+```

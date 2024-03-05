@@ -639,10 +639,14 @@ str(planets_df)
 planets_df$name
 ```
 
-```{}
+```         
 ```
 
 ### 1.8.3 ordenar un dataframe
+
+```{r}
+order(planets_df$diameter)
+```
 
 ```{r}
 #order(planets_df$diameter)
@@ -691,6 +695,10 @@ planets_df
 ```
 
 ### 1.8.5 filtrado usando subset
+
+```{r}
+diameter
+```
 
 ```{r}
 #seleccionamos planetas con diametro <1
@@ -1042,7 +1050,7 @@ JsonData
 -   se pueden sumar elementos con diferente longitud
 -   Cuidado cuando cargamos multiples librerias
 
-# Ejercicios 
+# Ejercicios
 
 ```{r}
 months<-c(34, 54, 23, 12, 9, 1, 18)

@@ -736,7 +736,7 @@ my_list <- list(vec=my_vector, mat=my_matrix )
 my_list
 ```
 
-#### Ejercicio
+#### Ejercicio práctico
 
 -   Crea una lista que contenga el dataframe del ejercicio anterior planets_df, el número 7 y una secuencia del 1 al 3.
 
@@ -861,7 +861,7 @@ triple(2)
 triple()
 ```
 
-#### Ejercicio
+#### Ejercicio práctico
 
 -   Crea una funcion llamada myfunc que pase como parametro un vector y que en caso de que contenga un numero de elementos par, devuelva el vector con los elementos pares y en caso de ser impar, devuelva los impares
 
@@ -1004,7 +1004,7 @@ my_date
 str(append(li, rev(li)))
 ```
 
-### Ejercicios
+### Ejercicio práctico
 
 -   Existen datasets precargados en R. Mira la variable, mtcars.
 
@@ -1041,6 +1041,8 @@ JsonData
 
 -   se pueden sumar elementos con diferente longitud
 -   Cuidado cuando cargamos multiples librerias
+
+# Ejercicios 
 
 ```{r}
 months<-c(34, 54, 23, 12, 9, 1, 18)
